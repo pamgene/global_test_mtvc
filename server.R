@@ -60,10 +60,13 @@ server = shinyServer(function(input, output, session) {
     })
     
     observeEvent(input$go ,{
+      ctx = getCtx(session)
       result = setData() %>%
         group_by(Stratification.Factor) %>% 
         do(runMTvC(., input$standardize, input$directional))
-        browser()
+      result %>%
+        ctx$addNamespace() %>%
+        ctx$save()
     })
   })
 })
