@@ -102,6 +102,12 @@ server = shinyServer(function(input, output, session) {
   })
 })
 
+getMode = function(session){
+  # retreive url query parameters provided by tercen
+  query = parseQueryString(session$clientData$url_search)
+  return(query[["mode"]])
+}
+
 getColumnFactors = function(session){
   ctx = getCtx(session)
   ctx$cnames %>%
