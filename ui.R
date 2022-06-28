@@ -13,8 +13,9 @@ ui = shinyUI(fluidPage(
       selectInput("sf", "Set a stratification factor", choices = ""),
       checkboxInput("standardize", "Standardize", value = FALSE),
       checkboxInput("directional", "Directional", value = FALSE),
-      actionButton("go", "Run test")
-      
+      actionButton("runBtn", "Run test", disabled=TRUE),
+      h3(textOutput("mode")),
+      h5(textOutput("msg"))
    ),
   
   mainPanel(
