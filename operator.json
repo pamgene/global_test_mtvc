@@ -3,5 +3,6 @@
   "description": "Operator for performing a global test with multiple treatment versus control option",
   "tags": ["statistics", "pamgene"],
   "authors": ["rdewijn"],
-  "urls": ["https://github.com/tercen/template-shiny-operator"]
+  "urls": ["https://github.com/tercen/global_test_mtvc"],
+  "isViewOnly": false
 }
