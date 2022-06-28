@@ -28,11 +28,45 @@ server = shinyServer(function(input, output, session) {
     c("<None>", getColumnFactors(session))
   })
   
+  mode = reactive({getMode(session)})
+  msgReactive = reactiveValues(msg = "")
+
   observe({
     
     df = dataInput()
     updateSelectInput(session, "gv", choices = levels(df$response))
     updateSelectInput(session, "sf", choices = cFactors())
+    
+    observeEvent(input$runBtn, {
+      
+      shinyjs::disable("runBtn")
+      
+      msgReactive$msg = "Running ... please wait ..."
+      
+      tryCatch({
+        ctx = getCtx(session)
+        result = setData() %>%
+          group_by(Stratification.Factor) %>% 
+          do(runMTvC(., input$standardize, input$directional))
+        result %>%
+          ctx$addNamespace() %>%
+          ctx$save()
+        
+        msgReactive$msg = "Done"
+        
+      }, error = function(e) {
+        msgReactive$msg = paste0("Failed : ", toString(e))
+        print(paste0("Failed : ", toString(e)))
+      })
+    })
+    
+    output$mode = renderText({ 
+      mode()
+    })
+    
+    output$msg = renderText({ 
+      msgReactive$msg
+    })
     
     setData = reactive({
       ds = dataInput() %>%
@@ -49,6 +83,12 @@ server = shinyServer(function(input, output, session) {
     })
     
     output$design = renderTable({
+      
+      m = mode()
+      if (!is.null(m) && m == 'run'){
+        shinyjs::enable("runBtn")
+      }
+      
       if (input$sf == "") return()
       aTab = setData() %>%
         group_by(Stratification.Factor) %>%
@@ -59,17 +99,14 @@ server = shinyServer(function(input, output, session) {
         )
     })
     
-    observeEvent(input$go ,{
-      ctx = getCtx(session)
-      result = setData() %>%
-        group_by(Stratification.Factor) %>% 
-        do(runMTvC(., input$standardize, input$directional))
-      result %>%
-        ctx$addNamespace() %>%
-        ctx$save()
-    })
   })
 })
+
+getMode = function(session){
+  # retreive url query parameters provided by tercen
+  query = parseQueryString(session$clientData$url_search)
+  return(query[["mode"]])
+}
 
 getColumnFactors = function(session){
   ctx = getCtx(session)
